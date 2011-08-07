@@ -3,14 +3,13 @@
 module Web.JonathansCard
     (
       Balance(..)
+    , Change(..)
     , balances
     , latest
     , changes
     ) where
 
 import Control.Monad        ( ap, liftM )
-import Data.Maybe           ( fromMaybe )
-import Data.Text.Encoding   ( decodeUtf8, encodeUtf8 )
 import Text.JSON
 import Network.HTTP         ( Header(Header), HeaderName(..), Request(Request)
                             , RequestMethod(GET), getResponseBody, simpleHTTP
