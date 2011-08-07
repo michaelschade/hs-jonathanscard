@@ -36,24 +36,22 @@ data Change = Change
 
 -- | Retrieve a list of balances on Jonathan's Card
 balances :: IO (Either String [Balance])
-balances  = flip catchIO (\_ -> err) $ do
-    rsp <- (decode . C8.unpack) `liftM` request "balances"
-    return . resultToEither $ valFromObj "balances" =<< rsp
-    where err = return . Left $ "Unable to retrieve balances."
+balances  = apiCall "balances" "balances" "balances"
 
 -- | Retrieve the latest balance on Jonathan's Card
 latest :: IO (Either String Balance)
-latest  = flip catchIO (\_ -> err) $ do
-    rsp <- (decode . C8.unpack) `liftM` request "latest"
-    return . resultToEither $ valFromObj "balance" =<< rsp
-    where err = return . Left $ "Unable to retrieve latest balance."
+latest  = apiCall "latest" "balance" "latest balance"
 
 -- | Retrieve the changes in amounts on Jonathan's Card
 changes :: IO (Either String [Change])
-changes  = flip catchIO (\_ -> err) $ do
-    rsp <- (decode . C8.unpack) `liftM` request "changes"
-    return . resultToEither $ valFromObj "changes" =<< rsp
-    where err = return . Left $ "Unable to retrieve changes."
+changes  = apiCall "changes" "changes" "changes"
+
+-- | Abstracts the details of the API call and body parsing.
+apiCall :: JSON a => String -> String -> String -> IO (Either String a)
+apiCall endpoint parent errObject = flip catchIO (\_ -> err) $ do
+    rsp <- (decode . C8.unpack) `liftM` request endpoint
+    return . resultToEither $ valFromObj parent =<< rsp
+    where err = return . Left $ "Unable to retrieve " ++ errObject ++ "."
 
 -----------------------
 -- Request Utilities --
