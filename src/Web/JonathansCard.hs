@@ -18,7 +18,7 @@ import Network.HTTP         ( Header(Header), HeaderName(..), Request(Request)
                             , catchIO
                             )
 import Network.URI          ( URI(URI), URIAuth(URIAuth) )
-import qualified Data.ByteString.Char8  as C8
+import Data.ByteString.Char8 ( ByteString, unpack )
 
 -- | Represents a Balance on Jonathan's Card
 data Balance = Balance
@@ -50,7 +50,7 @@ changes  = apiCall "changes" "changes" "changes"
 -- | Abstracts the details of the API call and body parsing.
 apiCall :: JSON a => String -> String -> String -> IO (Either String a)
 apiCall endpoint parent errObject = flip catchIO (\_ -> err) $ do
-    rsp <- (decode . C8.unpack) `liftM` request endpoint
+    rsp <- (decode . unpack) `liftM` request endpoint
     return . resultToEither $ valFromObj parent =<< rsp
     where err = return . Left $ "Unable to retrieve " ++ errObject ++ "."
 
@@ -59,11 +59,11 @@ apiCall endpoint parent errObject = flip catchIO (\_ -> err) $ do
 -----------------------
 
 -- | Sends response to server
-request  :: String -> IO C8.ByteString
+request  :: String -> IO ByteString
 request p = (simpleHTTP $ prepRq p) >>= getResponseBody
 
 -- | Prepare request to API
-prepRq  :: String -> Request C8.ByteString
+prepRq  :: String -> Request ByteString
 prepRq p = Request (url p) GET headers ""
     where
         headers = [ Header HdrAccept    "application/json"
