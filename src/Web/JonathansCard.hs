@@ -10,7 +10,9 @@ module Web.JonathansCard
     ) where
 
 import Control.Monad        ( ap, liftM )
-import Text.JSON
+import Text.JSON            ( JSON(..), JSObject(..), JSValue(..), Result
+                            , decode, resultToEither, valFromObj
+                            )
 import Network.HTTP         ( Header(Header), HeaderName(..), Request(Request)
                             , RequestMethod(GET), getResponseBody, simpleHTTP
                             , catchIO
