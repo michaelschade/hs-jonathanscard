@@ -1,0 +1,17 @@
+# Overview
+
+This is an implementation of the [Jonathan's Card API](http://jonathanstark.com/card/#api).
+The API is created by [Jonathan Stark](http://jonathanstark.com/),
+while this implementation is created by [Michael Schade](http://mschade.me/)
+([@michaelschade](https://twitter.com/intent/user?screen_name=michaelschade))
+
+# Usage
+
+Usage is fairly self-explanatory. Simply make a call to:
+
+* `balances`
+* `changes`
+* `latest`
+
+and then unwrap it from the IO and Either monads to play with `Balance`
+or `Change`.
