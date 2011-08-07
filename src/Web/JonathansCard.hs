@@ -5,6 +5,7 @@ module Web.JonathansCard
       Balance(..)
     , balances
     , latest
+    , changes
     ) where
 
 import Control.Monad        ( ap, liftM )
@@ -20,10 +21,17 @@ import qualified Data.ByteString.Char8  as C8
 
 -- | Represents a Balance on Jonathan's Card
 data Balance = Balance
-    { amount    :: Double
-    , balanceId :: Int
-    , created   :: String
-    , message   :: String
+    { balAmount     :: Double
+    , balBalanceId  :: Int
+    , balCreated    :: String
+    , balMessage    :: String
+    } deriving Show
+
+-- | Represents the changes over time on Jonathan's Card
+data Change = Change
+    { chgBalance    :: Double
+    , chgCreated    :: String
+    , chgDelta      :: Double
     } deriving Show
 
 -- | Retrieve a list of balances on Jonathan's Card
@@ -39,6 +47,13 @@ latest  = flip catchIO (\_ -> err) $ do
     rsp <- (decode . C8.unpack) `liftM` request "latest"
     return . resultToEither $ valFromObj "balance" =<< rsp
     where err = return . Left $ "Unable to retrieve latest balance."
+
+-- | Retrieve the changes in amounts on Jonathan's Card
+changes :: IO (Either String [Change])
+changes  = flip catchIO (\_ -> err) $ do
+    rsp <- (decode . C8.unpack) `liftM` request "changes"
+    return . resultToEither $ valFromObj "changes" =<< rsp
+    where err = return . Left $ "Unable to retrieve changes."
 
 -----------------------
 -- Request Utilities --
@@ -75,5 +90,13 @@ instance JSON Balance where
                     `ap` (read `liftM` get rsp "balance_id")
                     `ap` get rsp "created_at"
                     `ap` get rsp "message"
+    readJSON _ = undefined
+    showJSON   = undefined
+
+instance JSON Change where
+    readJSON (JSObject rsp) = do
+        Change   `liftM` (read `liftM` get rsp "balance")
+                    `ap` get rsp "created_at"
+                    `ap` (read `liftM` get rsp "delta")
     readJSON _ = undefined
     showJSON   = undefined
