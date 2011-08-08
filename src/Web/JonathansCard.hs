@@ -95,8 +95,8 @@ getTime  = parseTime defaultTimeLocale "%Y-%m-%dT%X%z"
 
 instance JSON Balance where
     readJSON (JSObject rsp) = do
-        Balance  `liftM` (read `liftM` get rsp "amount")
-                    `ap` (read `liftM` get rsp "balance_id")
+        Balance  `liftM` (read    `liftM` get rsp "amount")
+                    `ap` (read    `liftM` get rsp "balance_id")
                     `ap` (getTime `liftM` get rsp "created_at")
                     `ap` get rsp "message"
     readJSON _ = undefined
@@ -104,8 +104,8 @@ instance JSON Balance where
 
 instance JSON Change where
     readJSON (JSObject rsp) = do
-        Change   `liftM` (read `liftM` get rsp "balance")
+        Change   `liftM` (read    `liftM` get rsp "balance")
                     `ap` (getTime `liftM` get rsp "created_at")
-                    `ap` (read `liftM` get rsp "delta")
+                    `ap` (read    `liftM` get rsp "delta")
     readJSON _ = undefined
     showJSON   = undefined
