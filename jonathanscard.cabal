@@ -1,5 +1,5 @@
 Name:                jonathanscard
-Version:             0.1
+Version:             0.1.1
 Homepage:            http://rawr.mschade.me/jonathanscard/
 Synopsis:            An implementation of the Jonathan's Card API.
 Description:         This implements the Jonathan's Card API, as detailed at
