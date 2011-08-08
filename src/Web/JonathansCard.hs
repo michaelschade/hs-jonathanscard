@@ -7,31 +7,37 @@ module Web.JonathansCard
     , balances
     , latest
     , changes
+
+    {- Re-Export -}
+    , UTCTime
     ) where
 
-import Control.Monad        ( ap, liftM )
-import Text.JSON            ( JSON(..), JSObject(..), JSValue(..), Result
-                            , decode, resultToEither, valFromObj
-                            )
-import Network.HTTP         ( Header(Header), HeaderName(..), Request(Request)
-                            , RequestMethod(GET), getResponseBody, simpleHTTP
-                            , catchIO
-                            )
-import Network.URI          ( URI(URI), URIAuth(URIAuth) )
+import Control.Monad         ( ap, liftM )
 import Data.ByteString.Char8 ( ByteString, unpack )
+import Data.Time.Clock       ( UTCTime )
+import Data.Time.Format      ( parseTime )
+import Network.HTTP          ( Header(Header), HeaderName(..), Request(Request)
+                             , RequestMethod(GET), getResponseBody, simpleHTTP
+                             , catchIO
+                             )
+import Network.URI           ( URI(URI), URIAuth(URIAuth) )
+import System.Locale         ( defaultTimeLocale )
+import Text.JSON             ( JSON(..), JSObject(..), JSValue(..), Result
+                             , decode, resultToEither, valFromObj
+                             )
 
 -- | Represents a Balance on Jonathan's Card
 data Balance = Balance
     { balAmount     :: Double
     , balBalanceId  :: Int
-    , balCreated    :: String
+    , balCreated    :: Maybe UTCTime
     , balMessage    :: String
     } deriving Show
 
 -- | Represents the changes over time on Jonathan's Card
 data Change = Change
     { chgBalance    :: Double
-    , chgCreated    :: String
+    , chgCreated    :: Maybe UTCTime
     , chgDelta      :: Double
     } deriving Show
 
@@ -83,11 +89,15 @@ url p = URI "http:" uriAuth ("/card/api/" ++ p) "" ""
 get :: JSON a => JSObject JSValue -> String -> Result a
 get  = flip valFromObj
 
+-- | Attempts to parse a string into a UTCTime.
+getTime :: String -> Maybe UTCTime
+getTime  = parseTime defaultTimeLocale "%Y-%m-%dT%X%z"
+
 instance JSON Balance where
     readJSON (JSObject rsp) = do
         Balance  `liftM` (read `liftM` get rsp "amount")
                     `ap` (read `liftM` get rsp "balance_id")
-                    `ap` get rsp "created_at"
+                    `ap` (getTime `liftM` get rsp "created_at")
                     `ap` get rsp "message"
     readJSON _ = undefined
     showJSON   = undefined
@@ -95,7 +105,7 @@ instance JSON Balance where
 instance JSON Change where
     readJSON (JSObject rsp) = do
         Change   `liftM` (read `liftM` get rsp "balance")
-                    `ap` get rsp "created_at"
+                    `ap` (getTime `liftM` get rsp "created_at")
                     `ap` (read `liftM` get rsp "delta")
     readJSON _ = undefined
     showJSON   = undefined
